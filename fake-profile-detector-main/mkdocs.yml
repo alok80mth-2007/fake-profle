@@ -1,0 +1,58 @@
+site_name: Fake Profile Detector
+site_description: AI-powered tool for detecting fake social media profiles
+site_author: Latex999
+repo_url: https://github.com/Latex999/fake-profile-detector
+repo_name: Latex999/fake-profile-detector
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist
+  - admonition
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Installation: installation.md
+    - Getting Started: user_guide.md
+    - FAQ: faq.md
+  - Developer Guide: 
+    - Overview: developer_guide.md
+    - API Documentation: api_docs.md
+    - Model Training: model_training.md
+  - Contributing: ../CONTRIBUTING.md
+  - License: ../LICENSE
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            docstring_style: google
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Latex999/fake-profile-detector
+  version:
+    provider: mike

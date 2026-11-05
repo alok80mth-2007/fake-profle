@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}About - Fake Profile Detector{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Home
+    </a>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-8">
+        <h1>About Fake Profile Detector</h1>
+        <p class="lead">
+            Our AI-powered tool helps identify fake and bot accounts across social media platforms.
+        </p>
+        
+        <h3 class="mt-5 mb-3">Our Mission</h3>
+        <p>
+            Social media has transformed how we connect and communicate, but it has also created new opportunities for deception.
+            Fake profiles and bot accounts can spread misinformation, manipulate public opinion, and perpetrate scams.
+        </p>
+        <p>
+            Our mission is to help individuals and organizations identify fake profiles easily, making the social media 
+            landscape more transparent and trustworthy for everyone.
+        </p>
+        
+        <h3 class="mt-5 mb-3">How It Works</h3>
+        <p>
+            The Fake Profile Detector uses a combination of machine learning techniques and heuristic analysis to evaluate 
+            the authenticity of social media profiles. Our system analyzes numerous factors including:
+        </p>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-user text-primary me-2"></i>Profile Analysis</h5>
+                        <p class="card-text">We examine profile attributes such as account age, follower-to-following ratio, 
+                        profile picture characteristics, and bio information.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-file-alt text-success me-2"></i>Content Analysis</h5>
+                        <p class="card-text">Our algorithms analyze post content, sentiment patterns, language use, 
+                        repetitiveness, and the presence of suspicious keywords or spam patterns.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-chart-line text-info me-2"></i>Activity Patterns</h5>
+                        <p class="card-text">We detect abnormal posting frequencies, unusual timing patterns, and suspicious
+                        engagement metrics that are common in automated accounts.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-project-diagram text-danger me-2"></i>Network Analysis</h5>
+                        <p class="card-text">Our system evaluates the account's social connections, looking for isolation patterns,
+                        suspicious connection clusters, or abnormal interaction behaviors.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h3 class="mt-4 mb-3">Our Technology Stack</h3>
+        <p>
+            The Fake Profile Detector is built using modern, high-performance technologies:
+        </p>
+        <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item"><i class="fab fa-python text-primary me-2"></i><strong>Python 3.10+:</strong> High-performance core analytics and feature extraction</li>
+            <li class="list-group-item"><i class="fas fa-brain text-danger me-2"></i><strong>Ensemble ML (scikit-learn & Gradient Boosting):</strong> Combining Random Forests & Gradient Boosted Trees for optimal tabular accuracy</li>
+            <li class="list-group-item"><i class="fas fa-flask text-success me-2"></i><strong>Flask:</strong> Responsive asynchronous web interface and REST API</li>
+            <li class="list-group-item"><i class="fas fa-chart-bar text-info me-2"></i><strong>Plotly:</strong> Interactive feature importance & activity timeline charts</li>
+            <li class="list-group-item"><i class="fab fa-bootstrap text-purple me-2"></i><strong>Bootstrap 5:</strong> Modern responsive presentation and accessibility</li>
+        </ul>
+
+        {% if metadata and metadata.metrics %}
+        <h3 class="mt-5 mb-3"><i class="fas fa-microchip text-primary me-2"></i>Model Architecture & Performance</h3>
+        <p>
+            Our active detector utilizes an Ensemble Classifier trained across 20 distinct social media indicators
+            (incorporating feature engineering inspired by Vinod-Ghanchi's social fake account detection research):
+        </p>
+        <div class="card mb-4 shadow-sm border-0 bg-light">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 col-md-3 mb-2">
+                        <small class="text-muted d-block">Cross-Val Accuracy</small>
+                        <span class="fs-4 fw-bold text-success">{{ (metadata.metrics.accuracy * 100)|round(1) }}%</span>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <small class="text-muted d-block">Precision</small>
+                        <span class="fs-4 fw-bold text-primary">{{ (metadata.metrics.precision * 100)|round(1) }}%</span>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <small class="text-muted d-block">Recall</small>
+                        <span class="fs-4 fw-bold text-info">{{ (metadata.metrics.recall * 100)|round(1) }}%</span>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <small class="text-muted d-block">ROC-AUC Score</small>
+                        <span class="fs-4 fw-bold text-danger">{{ (metadata.metrics.roc_auc * 100)|round(1) }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <h3 class="mt-5 mb-3">Limitations & Continuous Improvement</h3>
+        <p>
+            While our system is highly effective, we acknowledge several limitations:
+        </p>
+        <ul>
+            <li>The tool provides <em>probability scores</em>, not absolute determinations</li>
+            <li>Sophisticated fake profiles may occasionally evade detection</li>
+            <li>Private profiles with limited public data may yield less reliable results</li>
+            <li>Platform API limitations may restrict the depth of analysis possible</li>
+        </ul>
+        <p>
+            We're continuously improving our algorithms and detection methods to address these limitations and stay ahead of 
+            evolving fake profile techniques.
+        </p>
+        
+        <h3 class="mt-5 mb-3">Privacy & Ethics</h3>
+        <p>
+            We take privacy and ethical considerations seriously. Our tool:
+        </p>
+        <ul>
+            <li>Only analyzes publicly available information</li>
+            <li>Does not store profile data beyond the current session</li>
+            <li>Is designed to minimize false positives</li>
+            <li>Provides explanations for all determinations to ensure transparency</li>
+        </ul>
+        <p>
+            We encourage users to exercise judgment when interpreting results and to consider the tool as one factor in their 
+            overall assessment of profile authenticity.
+        </p>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card sticky-top" style="top: 20px;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                Is this service free to use?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, the basic profile analysis service is completely free to use. We may introduce premium features for high-volume batch processing or advanced analytics in the future.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                How accurate is the detection?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Our system typically achieves 85-90% accuracy in identifying fake profiles. However, sophisticated fake profiles can occasionally evade detection, and some legitimate but unusual profiles might receive higher suspicion scores. Always use your judgment alongside our tool.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Do I need API keys to use this tool?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                No, you don't need API keys for basic functionality. Our tool uses publicly available information to make its assessments. However, providing API credentials in the .env file will allow for deeper analysis with access to more profile data.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                How many profiles can I analyze at once?
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Our batch analysis tool supports up to 500 profiles per upload. Larger datasets may require splitting into multiple files or contacting us for custom solutions.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                Can I run this tool on my own server?
+                            </button>
+                        </h2>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, the code is available on GitHub and can be deployed on your own server. Follow the setup instructions in the README file to get started. You'll need Python 3.8+ and the dependencies listed in requirements.txt.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

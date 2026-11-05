@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Profile Analysis{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Home
+    </a>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-6">
+        <h1 class="mb-4">Batch Profile Analysis</h1>
+        <p class="lead">
+            Analyze multiple social media profiles at once by uploading a CSV or TXT file.
+        </p>
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle me-2"></i>How to prepare your file:</h5>
+            <p>
+                Create a text file (.txt) or CSV file (.csv) with one profile URL or username per line.
+                For example:
+            </p>
+            <pre class="bg-light p-3">twitter.com/username1
+@username2
+instagram.com/username3
+facebook.com/username4</pre>
+            <p class="mb-0">
+                All profiles in the batch must be from the same platform that you select below.
+            </p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Profiles</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('batch_analysis') }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Profile List File (TXT or CSV)</label>
+                        <input type="file" class="form-control" id="file" name="file" required accept=".txt,.csv">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Select Platform</label>
+                        <div class="d-flex">
+                            <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="platform" id="twitter" value="twitter" checked>
+                                <label class="form-check-label" for="twitter">
+                                    <i class="fab fa-twitter text-info me-1"></i> Twitter/X
+                                </label>
+                            </div>
+                            <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="platform" id="instagram" value="instagram">
+                                <label class="form-check-label" for="instagram">
+                                    <i class="fab fa-instagram text-danger me-1"></i> Instagram
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="platform" id="facebook" value="facebook">
+                                <label class="form-check-label" for="facebook">
+                                    <i class="fab fa-facebook text-primary me-1"></i> Facebook
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-cogs me-2"></i>Start Batch Analysis
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Batch Analysis Benefits</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <i class="fas fa-tachometer-alt fa-2x text-primary"></i>
+                        </div>
+                        <h5>Efficient Processing</h5>
+                        <p>Analyze hundreds of profiles with a single upload, saving time and effort.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <i class="fas fa-file-csv fa-2x text-success"></i>
+                        </div>
+                        <h5>Comprehensive Reports</h5>
+                        <p>Get detailed CSV reports with analysis results for all profiles.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-pie fa-2x text-info"></i>
+                        </div>
+                        <h5>Statistical Overview</h5>
+                        <p>View summary statistics about bot prevalence in your dataset.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Use Cases</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h5><i class="fas fa-users text-primary me-2"></i>Analyze Follower Quality</h5>
+                        <p>Upload a list of your followers to identify what percentage might be bots or fake accounts. This helps measure your true audience reach and engagement potential.</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h5><i class="fas fa-search-dollar text-success me-2"></i>Influencer Verification</h5>
+                        <p>Before partnering with influencers, analyze their follower base to ensure they have authentic engagement and aren't inflating their metrics with fake followers.</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h5><i class="fas fa-shield-alt text-danger me-2"></i>Account Security Audit</h5>
+                        <p>Regularly scan accounts following your executives or brand profiles to identify potential security risks from suspicious accounts.</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h5><i class="fas fa-bullhorn text-info me-2"></i>Campaign Monitoring</h5>
+                        <p>After a marketing campaign, analyze new followers gained to ensure they're authentic and not bot-driven inflation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

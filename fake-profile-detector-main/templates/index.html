@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Fake Profile Detector - Identify Bots and Fake Accounts{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-md-6">
+        <h1 class="mb-4">Detect Fake Social Media Profiles</h1>
+        <p class="lead">
+            Our AI-powered tool helps you identify bot and fake accounts across social media platforms.
+            Simply enter a profile URL or username to analyze.
+        </p>
+        <p>
+            <i class="fas fa-check-circle text-success me-2"></i> Analyze Twitter/X, Instagram, and Facebook profiles<br>
+            <i class="fas fa-check-circle text-success me-2"></i> Get detailed reports with confidence scores<br>
+            <i class="fas fa-check-circle text-success me-2"></i> Understand suspicious patterns and indicators<br>
+            <i class="fas fa-check-circle text-success me-2"></i> Make informed decisions about unknown accounts
+        </p>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-search me-2"></i>Analyze a Profile</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('analyze_profile') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="profile_url" class="form-label">Profile URL or Username</label>
+                        <input type="text" class="form-control" id="profile_url" name="profile_url" required
+                               placeholder="E.g., twitter.com/username or @username">
+                        <div class="form-text">Enter a full URL or just the username with or without @</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Select Platform</label>
+                        <div class="d-flex">
+                            <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="platform" id="twitter" value="twitter">
+                                <label class="form-check-label" for="twitter">
+                                    <i class="fab fa-twitter text-info me-1"></i> Twitter/X
+                                </label>
+                            </div>
+                            <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="platform" id="instagram" value="instagram" checked>
+                                <label class="form-check-label" for="instagram">
+                                    <i class="fab fa-instagram text-danger me-1"></i> Instagram
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="platform" id="facebook" value="facebook">
+                                <label class="form-check-label" for="facebook">
+                                    <i class="fab fa-facebook text-primary me-1"></i> Facebook
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optional Manual Metrics Toggle -->
+                    <div class="mb-3">
+                        <a class="text-decoration-none small text-muted d-flex align-items-center" data-bs-toggle="collapse" href="#manualMetricsSection" role="button" aria-expanded="false" aria-controls="manualMetricsSection">
+                            <i class="fas fa-sliders-h me-1 text-primary"></i> <strong>Custom / Manual Metrics (Optional)</strong>
+                            <i class="fas fa-chevron-down ms-auto text-primary"></i>
+                        </a>
+                        <div class="collapse mt-2" id="manualMetricsSection">
+                            <div class="p-3 bg-light rounded border">
+                                <small class="text-muted d-block mb-2">Leave blank to automatically scrape real live data from Instagram. Fill these in only if you want to override or test specific numbers:</small>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label small mb-1">Followers Count</label>
+                                        <input type="number" class="form-control form-control-sm" name="manual_followers" placeholder="Auto-scraped or enter count">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small mb-1">Following Count</label>
+                                        <input type="number" class="form-control form-control-sm" name="manual_following" placeholder="Auto-scraped or enter count">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label small mb-1">Total Posts</label>
+                                        <input type="number" class="form-control form-control-sm" name="manual_posts" placeholder="Auto-scraped or enter count">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small mb-1">Account Age (Days)</label>
+                                        <input type="number" class="form-control form-control-sm" name="manual_age_days" placeholder="e.g. 730">
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label small mb-1">Profile Bio</label>
+                                    <textarea class="form-control form-control-sm" name="manual_bio" rows="2" placeholder="Auto-scraped or custom bio text"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-magnifying-glass me-2"></i>Analyze Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 text-center">
+        <h2>How It Works</h2>
+        <p class="lead mb-5">Our detector uses multiple techniques to identify fake profiles with high accuracy</p>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-id-card fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Profile Analysis</h5>
+                <p class="card-text">We analyze profile information, follower/following ratios, and account age to identify suspicious patterns.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-comment-dots fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">Content Evaluation</h5>
+                <p class="card-text">Our NLP models assess post content, sentiment patterns, and linguistic characteristics.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-image fa-3x text-info"></i>
+                </div>
+                <h5 class="card-title">Image Analysis</h5>
+                <p class="card-text">We detect AI-generated profile pictures, stock photos, and other visual red flags.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-share-nodes fa-3x text-danger"></i>
+                </div>
+                <h5 class="card-title">Network Evaluation</h5>
+                <p class="card-text">We examine relationship patterns and interactions to identify isolated or artificial networks.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 mb-4 text-center">
+        <h2>Why Use Our Detector?</h2>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-user-shield text-primary me-2"></i>For Personal Use</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Avoid scammers and catfishing attempts</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Verify legitimacy of potential connections</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Protect yourself from phishing and social engineering</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Make informed decisions about friend requests</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-building text-primary me-2"></i>For Business Use</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Verify authenticity of influencers before partnerships</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Identify bot followers in your audience analytics</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Detect fake competitors or impersonation accounts</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Improve social media security practices</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 text-center mb-4">
+        <h2>Ready to get started?</h2>
+        <p class="lead">Try analyzing a profile or use our bulk analysis tool for multiple accounts.</p>
+    </div>
+    <div class="col-md-6 mb-4">
+        <a href="#" class="btn btn-primary btn-lg w-100" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
+            <i class="fas fa-magnifying-glass me-2"></i>Analyze a Profile
+        </a>
+    </div>
+    <div class="col-md-6 mb-4">
+        <a href="{{ url_for('batch_analysis') }}" class="btn btn-outline-primary btn-lg w-100">
+            <i class="fas fa-tasks me-2"></i>Batch Analysis
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+{% endblock %}

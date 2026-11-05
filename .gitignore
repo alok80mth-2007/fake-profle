@@ -1,0 +1,109 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
+app.log
+
+# Uploads, temporary and generated results
+uploads/*
+!uploads/.gitkeep
+results/*
+!results/.gitkeep
+temp/*
+!temp/.gitkeep
+tmp/
+
+# Machine Learning models and checkpoints (preserve metadata / structure)
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.model
+*.pt
+*.pth
+*.onnx
+models/*.pkl
+models/*.joblib
+!models/model_metadata.json
+
+# Documentation build
+site/
+
+# Testing & coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Flask specific
+instance/
+.webassets-cache

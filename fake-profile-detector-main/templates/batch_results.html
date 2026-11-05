@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Analysis Results{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('batch_analysis') }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Batch Analysis
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Batch Analysis Results</h1>
+        <p class="text-muted">
+            Analysis performed on {{ timestamp }}
+        </p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="d-grid gap-2">
+            <button class="btn btn-outline-secondary" onclick="window.print();">
+                <i class="fas fa-print me-2"></i>Print Results
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Statistics -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Summary Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center mb-4">
+                        <div class="card h-100 border-0">
+                            <div class="card-body">
+                                <h1 class="display-4">{{ results|length }}</h1>
+                                <p class="text-muted">Total Profiles Analyzed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 text-center mb-4">
+                        <div class="card h-100 border-0">
+                            <div class="card-body">
+                                {% set fake_count = results|selectattr('is_fake', 'defined')|selectattr('is_fake')|list|length %}
+                                <h1 class="display-4 text-danger">{{ fake_count }}</h1>
+                                <p class="text-muted">Likely Fake Profiles</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 text-center mb-4">
+                        <div class="card h-100 border-0">
+                            <div class="card-body">
+                                {% set real_count = results|selectattr('is_fake', 'defined')|rejectattr('is_fake')|list|length %}
+                                <h1 class="display-4 text-success">{{ real_count }}</h1>
+                                <p class="text-muted">Likely Authentic Profiles</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 text-center mb-4">
+                        <div class="card h-100 border-0">
+                            <div class="card-body">
+                                {% set error_count = results|selectattr('error', 'defined')|list|length %}
+                                <h1 class="display-4 text-warning">{{ error_count }}</h1>
+                                <p class="text-muted">Processing Errors</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div id="status-chart" style="height: 300px;"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="probability-chart" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Results Table -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Detailed Results</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="results-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Platform</th>
+                        <th>Status</th>
+                        <th>Probability</th>
+                        <th>Risk Level</th>
+                        <th>Suspicious Indicators</th>
+                        <th>Profile Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr class="{{ 'table-danger' if result.is_fake else 'table-success' if result.is_fake is defined else 'table-warning' }}">
+                        <td>{{ result.profile_data.username if (result.profile_data is defined and result.profile_data.username is defined) else (result.profile if result.profile is defined else 'Unknown') }}</td>
+                        <td>
+                            {% set plat = result.profile_data.platform if (result.profile_data is defined and result.profile_data.platform is defined) else (result.platform if result.platform is defined else 'globe') %}
+                            <i class="fab fa-{{ plat }} me-1"></i>
+                            {{ plat|capitalize }}
+                        </td>
+                        <td>
+                            {% if result.error is defined %}
+                                <span class="badge bg-warning">Error</span>
+                            {% elif result.is_fake %}
+                                <span class="badge bg-danger">Likely Fake</span>
+                            {% else %}
+                                <span class="badge bg-success">Likely Authentic</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if result.probability is defined %}
+                                <div class="progress" title="{{ (result.probability * 100)|round(1) }}%">
+                                    <div class="progress-bar bg-{{ 'danger' if result.probability > 0.7 else 'warning' if result.probability > 0.4 else 'success' }}" 
+                                         role="progressbar" 
+                                         style="width: {{ (result.probability * 100)|round }}%;"
+                                         aria-valuenow="{{ (result.probability * 100)|round }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ (result.probability * 100)|round(1) }}%
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if result.probability is defined %}
+                                {% if result.probability >= 0.9 %}
+                                    <span class="badge bg-danger">Very High</span>
+                                {% elif result.probability >= 0.7 %}
+                                    <span class="badge bg-danger">High</span>
+                                {% elif result.probability >= 0.4 %}
+                                    <span class="badge bg-warning">Medium</span>
+                                {% elif result.probability >= 0.2 %}
+                                    <span class="badge bg-info">Low</span>
+                                {% else %}
+                                    <span class="badge bg-success">Very Low</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if result.indicators is defined %}
+                                <span class="badge bg-secondary">{{ result.indicators|length }}</span>
+                                {% if result.indicators|length > 0 %}
+                                    <button class="btn btn-sm btn-outline-info ms-2" 
+                                            data-bs-toggle="popover" 
+                                            data-bs-placement="left" 
+                                            title="Suspicious Indicators" 
+                                            data-bs-html="true"
+                                            data-bs-content="{% for indicator in result.indicators %}
+                                                           <div class='mb-1'><b>{{ indicator.name }}</b>: {{ indicator.description }}</div>
+                                                           {% endfor %}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if result.profile_data.url %}
+                                <a href="{{ result.profile_data.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Common Patterns -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Common Suspicious Patterns</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div id="indicator-chart" style="height: 400px;"></div>
+            </div>
+            <div class="col-md-6">
+                <h5>Top Suspicious Indicators</h5>
+                <p>These are the most common suspicious patterns detected across analyzed profiles:</p>
+                <div id="indicator-list">
+                    {% set indicators = {} %}
+                    {% for result in results if result.indicators is defined %}
+                        {% for indicator in result.indicators %}
+                            {% if indicator.name in indicators %}
+                                {% set _ = indicators.update({indicator.name: indicators[indicator.name] + 1}) %}
+                            {% else %}
+                                {% set _ = indicators.update({indicator.name: 1}) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    
+                    {% set sorted_indicators = indicators.items()|sort(attribute='1', reverse=true) %}
+                    
+                    <ul class="list-group">
+                        {% for name, count in sorted_indicators[:5] %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ name }}
+                            <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize popovers
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+    });
+    
+    // Status chart
+    var statusData = [{
+        values: [
+            {{ results|selectattr('is_fake', 'defined')|selectattr('is_fake')|list|length }},
+            {{ results|selectattr('is_fake', 'defined')|rejectattr('is_fake')|list|length }},
+            {{ results|selectattr('error', 'defined')|list|length }}
+        ],
+        labels: ['Likely Fake', 'Likely Authentic', 'Processing Errors'],
+        type: 'pie',
+        marker: {
+            colors: ['#dc3545', '#28a745', '#ffc107']
+        }
+    }];
+    
+    var statusLayout = {
+        title: 'Profile Authentication Results',
+        height: 300,
+        margin: {l: 0, r: 0, b: 0, t: 40, pad: 0}
+    };
+    
+    Plotly.newPlot('status-chart', statusData, statusLayout, {responsive: true});
+    
+    // Probability distribution chart
+    var probabilities = [];
+    {% for result in results if result.probability is defined %}
+        probabilities.push({{ result.probability }});
+    {% endfor %}
+    
+    var probabilityData = [{
+        x: probabilities,
+        type: 'histogram',
+        autobinx: false,
+        xbins: {
+            start: 0,
+            end: 1,
+            size: 0.1
+        },
+        marker: {
+            color: '#4361ee'
+        }
+    }];
+    
+    var probabilityLayout = {
+        title: 'Fake Probability Distribution',
+        xaxis: {title: 'Probability Score', range: [0, 1]},
+        yaxis: {title: 'Number of Profiles'},
+        height: 300,
+        margin: {l: 50, r: 20, b: 50, t: 40}
+    };
+    
+    Plotly.newPlot('probability-chart', probabilityData, probabilityLayout, {responsive: true});
+    
+    // Indicator chart
+    var indicatorData = [];
+    {% set indicators = {} %}
+    {% for result in results if result.indicators is defined %}
+        {% for indicator in result.indicators %}
+            {% if indicator.name in indicators %}
+                {% set _ = indicators.update({indicator.name: indicators[indicator.name] + 1}) %}
+            {% else %}
+                {% set _ = indicators.update({indicator.name: 1}) %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    
+    {% set sorted_indicators = indicators.items()|sort(attribute='1', reverse=true) %}
+    
+    var indicatorLabels = [];
+    var indicatorValues = [];
+    
+    {% for name, count in sorted_indicators[:10] %}
+        indicatorLabels.push("{{ name }}");
+        indicatorValues.push({{ count }});
+    {% endfor %}
+    
+    var indicatorData = [{
+        x: indicatorValues,
+        y: indicatorLabels,
+        type: 'bar',
+        orientation: 'h',
+        marker: {
+            color: '#f72585'
+        }
+    }];
+    
+    var indicatorLayout = {
+        title: 'Top Suspicious Indicators',
+        height: 400,
+        margin: {l: 150, r: 20, b: 50, t: 40}
+    };
+    
+    Plotly.newPlot('indicator-chart', indicatorData, indicatorLayout, {responsive: true});
+});
+</script>
+{% endblock %}

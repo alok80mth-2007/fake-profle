@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - {{ report.username }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Home
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Profile Analysis Results</h1>
+        <p class="text-muted">
+            Analysis performed on {{ timestamp }}
+        </p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="d-grid gap-2">
+            <button class="btn btn-outline-secondary" onclick="window.print();">
+                <i class="fas fa-print me-2"></i>Print Report
+            </button>
+        </div>
+    </div>
+</div>
+
+{% if report.data_source == 'live' or report.profile_summary.data_source == 'live' %}
+<div class="alert alert-success d-flex align-items-center mb-4 shadow-sm" role="alert">
+    <i class="fas fa-check-circle me-2 fa-lg"></i>
+    <div>
+        <strong>Live Profile Data Verified:</strong> Real profile metrics (followers, following, post count, bio, and avatar) were scraped in real-time directly from {{ report.platform_name|default(report.platform|capitalize) }}.
+    </div>
+</div>
+{% elif report.data_source == 'manual' or report.profile_summary.data_source == 'manual' %}
+<div class="alert alert-primary d-flex align-items-center mb-4 shadow-sm" role="alert">
+    <i class="fas fa-sliders-h me-2 fa-lg"></i>
+    <div>
+        <strong>Custom Values Used:</strong> Analysis was performed using your manually specified profile numbers.
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning d-flex align-items-center mb-4 shadow-sm" role="alert">
+    <i class="fas fa-info-circle me-2 fa-lg"></i>
+    <div>
+        <strong>Notice (Estimated Metrics):</strong> Live profile could not be scraped directly (account may be private or protected by platform rate-limits). Estimated indicators were used. You can provide exact numbers using the "Custom Metrics" fields on the home page.
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- Profile Overview Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card profile-card h-100">
+            <div class="profile-header">
+                <div class="d-flex align-items-center">
+                    <img src="{{ report.profile_pic_url|default('https://via.placeholder.com/100?text=No+Image') }}" 
+                         class="profile-pic me-3" alt="Profile Picture">
+                    <div>
+                        <h3 class="mb-1">{{ report.username }}</h3>
+                        <p class="mb-0 text-muted">
+                            <i class="fab fa-{{ report.platform }} me-1"></i>
+                            {{ report.platform_name|default(report.platform|capitalize) }}
+                        </p>
+                        <a href="{{ report.profile_url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                            <i class="fas fa-external-link-alt me-1"></i>View Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5>Authentication Result</h5>
+                    <div class="text-center">
+                        <div class="rating-circle mb-3" style="background-color: {{ 'var(--bs-danger)' if report.is_fake else 'var(--bs-success)' }}">
+                            {{ report.formatted_probability }}
+                        </div>
+                        <h4 class="mb-0">
+                            <span class="badge bg-{{ report.risk_class }} badge-large">
+                                {% if report.is_fake %}
+                                    <i class="fas fa-robot me-1"></i>Likely Fake
+                                {% else %}
+                                    <i class="fas fa-user-check me-1"></i>Likely Authentic
+                                {% endif %}
+                            </span>
+                        </h4>
+                        <p class="text-muted mt-2">{{ report.risk_level }} Risk Level</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h5>Profile Summary</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-calendar me-2"></i>Account Age:</span>
+                            <span class="badge bg-secondary">{{ report.profile_summary.account_age_days|default(0) }} days</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-users me-2"></i>Followers:</span>
+                            <span class="badge bg-secondary">{{ report.profile_summary.followers|default(0) }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-plus me-2"></i>Following:</span>
+                            <span class="badge bg-secondary">{{ report.profile_summary.following|default(0) }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-chart-simple me-2"></i>Follower Ratio:</span>
+                            <span class="badge bg-secondary">{{ report.profile_summary.formatted_ratio|default('0') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-file-lines me-2"></i>Posts:</span>
+                            <span class="badge bg-secondary">{{ report.profile_summary.posts|default(0) }}</span>
+                        </li>
+                        {% if report.profile_summary.verified %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-badge-check me-2"></i>Verified:</span>
+                            <span class="badge bg-info">Yes</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Results -->
+    <div class="col-md-8">
+        <!-- Suspicious Indicators -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Suspicious Indicators</h5>
+            </div>
+            <div class="card-body">
+                {% if report.indicators %}
+                    <p>The following suspicious patterns were detected:</p>
+                    
+                    {% for indicator in report.indicator_details %}
+                    <div class="indicator-card {{ indicator.severity }} card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="mb-1">{{ indicator.name }}</h5>
+                                <span class="badge bg-{{ indicator.severity_class }}">{{ indicator.severity|capitalize }}</span>
+                            </div>
+                            <p class="mb-1">{{ indicator.description }}</p>
+                            <p class="text-muted mb-0 small"><i class="fas fa-info-circle me-1"></i>{{ indicator.explanation }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>No suspicious indicators detected
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Analysis Explanation -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-file-lines me-2 text-info"></i>Detailed Analysis</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ report.detailed_explanation }}</p>
+                
+                {% if report.recommendations %}
+                <h6 class="mt-4">Recommendations:</h6>
+                <ul class="list-group list-group-flush mt-2">
+                    {% for recommendation in report.recommendations %}
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>{{ recommendation }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Comparison with Typical Profiles -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2 text-primary"></i>Comparison with Typical Profiles</h5>
+            </div>
+            <div class="card-body">
+                {% if report.comparison_metrics %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>This Profile</th>
+                                <th>Typical Profile</th>
+                                <th>Difference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, comparison in report.comparison_metrics.items() %}
+                            <tr class="{{ 'table-danger' if comparison.is_suspicious else '' }}">
+                                <td>{{ key|replace('_', ' ')|title }}</td>
+                                <td>{{ comparison.actual|round(3) }}</td>
+                                <td>{{ comparison.typical|round(3) }}</td>
+                                <td>
+                                    {% if comparison.diff_percent > 0 %}
+                                    <span class="text-success">+{{ comparison.diff_percent|round }}%</span>
+                                    {% else %}
+                                    <span class="text-danger">{{ comparison.diff_percent|round }}%</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>No comparison data available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Feature Importance Chart -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-star me-2 text-warning"></i>Key Factors in Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div id="feature-chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-timeline me-2 text-primary"></i>Activity Timeline</h5>
+            </div>
+            <div class="card-body">
+                {% if report.timeline_data and report.timeline_data.dates %}
+                <div id="timeline-chart"></div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Insufficient data to generate activity timeline
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Platform-specific Insights -->
+{% if report.platform_insights %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fab fa-{{ report.platform }} me-2 text-info"></i>
+            {{ report.platform_insights.platform_name }} Specific Insights
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% if report.platform == 'twitter' or report.platform == 'x' %}
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas {{ 'fa-check text-success' if not report.platform_insights.created_after_elon_acquisition else 'fa-info-circle text-info' }} me-2"></i>
+                            Account {{ 'created after' if report.platform_insights.created_after_elon_acquisition else 'existed before' }} Elon Musk's acquisition
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas {{ 'fa-exclamation-triangle text-warning' if report.platform_insights.high_retweet_ratio else 'fa-check text-success' }} me-2"></i>
+                            {{ 'High percentage of retweets (low original content)' if report.platform_insights.high_retweet_ratio else 'Normal balance of original content and retweets' }}
+                        </li>
+                    </ul>
+                </div>
+            {% elif report.platform == 'instagram' %}
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas {{ 'fa-info-circle text-info' if report.platform_insights.is_business_account else 'fa-user text-primary' }} me-2"></i>
+                            {{ 'Business account' if report.platform_insights.is_business_account else 'Personal account' }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas {{ 'fa-exclamation-triangle text-warning' if report.platform_insights.excessive_hashtags else 'fa-check text-success' }} me-2"></i>
+                            {{ 'Excessive hashtag usage (' + report.platform_insights.avg_hashtags_per_post|round(1)|string + ' per post)' if report.platform_insights.excessive_hashtags else 'Normal hashtag usage (' + report.platform_insights.avg_hashtags_per_post|round(1)|string + ' per post)' }}
+                        </li>
+                    </ul>
+                </div>
+            {% elif report.platform == 'facebook' %}
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas {{ 'fa-exclamation-triangle text-warning' if report.platform_insights.low_profile_completeness else 'fa-check text-success' }} me-2"></i>
+                            Profile completeness: {{ (report.platform_insights.profile_completeness * 100)|round }}%
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas {{ 'fa-exclamation-triangle text-warning' if report.platform_insights.high_page_like_ratio else 'fa-check text-success' }} me-2"></i>
+                            {{ 'Unusually high ratio of page likes to friends' if report.platform_insights.high_page_like_ratio else 'Normal ratio of page likes to friends' }}
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Feature Importance Chart
+    {% if report.feature_importance and report.feature_importance['labels'] %}
+    var featureData = [{
+        x: {{ report.feature_importance['values']|tojson }},
+        y: {{ report.feature_importance['labels']|tojson }},
+        type: 'bar',
+        orientation: 'h',
+        marker: {
+            color: {{ report.feature_importance['colors']|tojson }},
+        }
+    }];
+    
+    var featureLayout = {
+        title: 'Feature Importance',
+        xaxis: {
+            title: 'Importance Score'
+        },
+        margin: {
+            l: 150,
+            r: 20,
+            t: 40,
+            b: 50
+        }
+    };
+    
+    Plotly.newPlot('feature-chart', featureData, featureLayout);
+    {% endif %}
+    
+    // Timeline Chart
+    {% if report.timeline_data and report.timeline_data.dates %}
+    var timelineData = [{
+        x: {{ report.timeline_data.dates|tojson }},
+        y: {{ report.timeline_data.post_counts|tojson }},
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Posts',
+        line: {
+            color: '#4361ee'
+        }
+    },
+    {
+        x: {{ report.timeline_data.dates|tojson }},
+        y: {{ report.timeline_data.engagement|tojson }},
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Engagement',
+        yaxis: 'y2',
+        line: {
+            color: '#f72585'
+        }
+    }];
+    
+    var timelineLayout = {
+        title: 'Posting Activity & Engagement',
+        xaxis: {
+            title: 'Date'
+        },
+        yaxis: {
+            title: 'Post Count'
+        },
+        yaxis2: {
+            title: 'Engagement',
+            titlefont: {color: '#f72585'},
+            tickfont: {color: '#f72585'},
+            overlaying: 'y',
+            side: 'right'
+        },
+        legend: {
+            x: 0,
+            y: 1.2,
+            orientation: 'h'
+        },
+        margin: {
+            l: 50,
+            r: 50,
+            t: 40,
+            b: 50
+        }
+    };
+    
+    Plotly.newPlot('timeline-chart', timelineData, timelineLayout);
+    {% endif %}
+});
+</script>
+{% endblock %}
